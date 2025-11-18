@@ -14,8 +14,8 @@ class PasienController extends Controller
     public function index()
     {
         $pasiens = Pasien::with('user')->latest()->get();
-        // return view('admin.pasien.index', compact('pasiens'));
-        return response()->json($pasiens); // Untuk API
+        return view('admin.pasien.index', compact('pasiens'));
+        //return response()->json($pasiens); // Untuk API
     }
 
     // Menampilkan form tambah pasien (Admin)
@@ -78,8 +78,8 @@ class PasienController extends Controller
     // Menampilkan form edit pasien (Admin)
     public function edit(Pasien $pasien)
     {
-        $pasien->load('user');
-        // return view('admin.pasien.edit', compact('pasien'));
+        $pasiens = Pasien::with('user')->latest()->get();
+        return view('admin.pasien.edit', compact('pasiens'));
     }
 
     // Update data pasien (Admin)
