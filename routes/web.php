@@ -5,7 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PasienController;
 use App\Http\Controllers\DokterController;
 use App\Http\Controllers\PerawatController;
-use App\Http\Controllers\JadwalDokterController;
+use App\Http\Controllers\JadwalDokterController; // Pastikan ini ada
 use App\Http\Controllers\RekamMedisController;
 use App\Http\Controllers\PembayaranController;
 
@@ -19,11 +19,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Dashboard Redirect Berdasarkan Role
-|--------------------------------------------------------------------------
-*/
 Route::get('/dashboard', function () {
     $user = auth()->user();
     if ($user->role === 'admin') {
@@ -38,69 +33,44 @@ Route::get('/dashboard', function () {
     return abort(403);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-/*
-|--------------------------------------------------------------------------
-| Rute Profil User
-|--------------------------------------------------------------------------
-*/
+// --- PROFILE ---
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Rute Sistem Klinik (Role-Based Access)
-|--------------------------------------------------------------------------
-*/
-
-// === GRUP ADMIN ===
+// --- ADMIN ---
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', fn() => view('admin.dashboard'))->name('dashboard');
     
-    // CRUD Utama (Manajemen Data)
     Route::resource('pasien', PasienController::class);
     Route::resource('dokter', DokterController::class);
     Route::resource('perawat', PerawatController::class);
 
-    // Jadwal dan Pembayaran
-    // Pastikan controller ini sudah ada, jika belum, buat dulu atau komentari baris ini
-    // Route::resource('jadwal-dokter', JadwalDokterController::class);
-    // Route::resource('pembayaran', PembayaranController::class);
+    // PERBAIKAN DI SINI: Tanda komentar // sudah dihapus
+    Route::resource('jadwal-dokter', JadwalDokterController::class);
+    
+    // Route::resource('pembayaran', PembayaranController::class); // Aktifkan jika controller sudah ada
 });
 
-
-// === GRUP DOKTER ===
+// --- DOKTER ---
 Route::middleware(['auth', 'role:dokter'])->prefix('dokter')->name('dokter.')->group(function () {
     Route::get('/dashboard', [DokterController::class, 'dashboard'])->name('dashboard');
-
-    // Mengisi rekam medis & resep
+    Route::get('jadwal', [JadwalDokterController::class, 'showJadwalSaya'])->name('jadwal.saya');
     Route::get('rekam-medis/create', [RekamMedisController::class, 'create'])->name('rekam-medis.create');
     Route::post('rekam-medis', [RekamMedisController::class, 'store'])->name('rekam-medis.store');
-    
-    // Melihat riwayat rekam medis pasien (Opsional)
-    // Route::get('rekam-medis/pasien/{pasien}', [RekamMedisController::class, 'showByPasien'])->name('rekam-medis.pasien');
 });
 
-
-// === GRUP PERAWAT ===
+// --- PERAWAT ---
 Route::middleware(['auth', 'role:perawat'])->prefix('perawat')->name('perawat.')->group(function () {
     Route::get('/dashboard', [PerawatController::class, 'dashboard'])->name('dashboard');
-
-    // Helper untuk melihat jadwal (Opsional)
-    // Route::get('jadwal-dokter', [JadwalDokterController::class, 'index'])->name('jadwal-dokter.index');
+    Route::get('jadwal-dokter', [JadwalDokterController::class, 'index'])->name('jadwal-dokter.index');
 });
 
-
-// === GRUP PASIEN ===
+// --- PASIEN ---
 Route::middleware(['auth', 'role:pasien'])->prefix('pasien')->name('pasien.')->group(function () {
-    // Menggunakan method 'dashboard' di PasienController untuk mengambil riwayat
     Route::get('/dashboard', [PasienController::class, 'dashboard'])->name('dashboard');
-
-    // Route::get('pembayaran', [PembayaranController::class, 'showPembayaranSaya'])->name('pembayaran.saya');
 });
 
 require __DIR__.'/auth.php';
