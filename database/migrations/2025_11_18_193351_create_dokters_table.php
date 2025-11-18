@@ -12,12 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('dokters', function (Blueprint $table) {
-    $table->id();
-    $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-    $table->string('spesialis');
-    // Tambahkan NIP/SIP jika perlu
-    $table->timestamps();
-});
+            $table->id();
+            // Menghubungkan ke tabel users (untuk login)
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            
+            // Data spesifik dokter
+            $table->string('spesialisasi'); // Contoh: Umum, Gigi, Bedah
+            $table->string('no_str');       // Nomor Surat Tanda Registrasi
+            
+            $table->timestamps();
+        });
     }
 
     /**
